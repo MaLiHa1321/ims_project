@@ -1,0 +1,20 @@
+/* Add to your Layout.css or create a new Stats.css */
+.inventory-stats .card {
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  border: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.inventory-stats .progress {
+  height: 1.5rem;
+}
+
+.inventory-stats .progress-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+}
+
+.inventory-stats .badge {
+  font-size: 0.75rem;
+}

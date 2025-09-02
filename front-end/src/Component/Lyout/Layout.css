@@ -1,0 +1,60 @@
+.main-content {
+  min-height: calc(100vh - 160px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .navbar-brand {
+    font-size: 1.1rem;
+  }
+  
+  .main-content {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+}
+
+/* Improve mobile touch targets */
+.nav-link {
+  padding: 0.5rem 1rem;
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+}
+
+
+
+.navbar-brand {
+  font-weight: bold;
+  font-size: 1.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .navbar-brand {
+    font-size: 1.2rem;
+  }
+  
+  .main-content {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+}
+
+/* Improve mobile touch targets */
+.nav-link {
+  padding: 0.5rem 1rem;
+}
+
+/* Style for the admin badge */
+.badge {
+  font-size: 0.6rem;
+  vertical-align: middle;
+}
+
+/* User info styling */
+.text-muted {
+  font-size: 0.9rem;
+  cursor: default;
+}
