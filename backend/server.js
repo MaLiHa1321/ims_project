@@ -14,6 +14,11 @@ app.use(cors({
 
 app.use(express.json());
 
+app.get("/", (req, res) => {
+  res.send("APP is running ");
+});
+
+
 // Routes
 // Add this after the other middleware
 app.use('/api/auth', require('./router/auth'));
@@ -37,6 +42,3 @@ mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTop
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
-app.get("/", (req, res) => {
-  res.send("APP is running ");
-});
