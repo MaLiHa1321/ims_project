@@ -34,14 +34,14 @@ const Dashboard = () => {
 
       // Fetch inventory counts
       const [myRes, sharedRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/inventories/my?limit=1', config),
-        axios.get('http://localhost:5000/api/inventories/shared?limit=1', config),
+        axios.get('https://ims-project-server.onrender.com/api/inventories/my?limit=1', config),
+        axios.get('https://ims-project-server.onrender.com/api/inventories/shared?limit=1', config),
       ]);
 
       // Fetch detailed stats
       let statsRes = { data: [] };
       try {
-        statsRes = await axios.get('http://localhost:5000/api/stats', config);
+        statsRes = await axios.get('https://ims-project-server.onrender.com/api/stats', config);
       } catch (itemsError) {
         console.warn('Could not fetch item stats:', itemsError);
         setStatsError('Item statistics temporarily unavailable');

@@ -27,7 +27,7 @@
 //   const fetchInventory = async () => {
 //     try {
 //       const token = localStorage.getItem('token');
-//       const res = await axios.get(`http://localhost:5000/api/inventories/${id}`, {
+//       const res = await axios.get(`https://ims-project-server.onrender.com/api/inventories/${id}`, {
 //         headers: { Authorization: token ? `Bearer ${token}` : '' },
 //       });
 //       setInventory(res.data);
@@ -64,10 +64,10 @@
 //       };
 
 //       if (id) {
-//         await axios.put(`http://localhost:5000/api/inventories/${id}`, { ...inventory, version: inventory.version }, config);
+//         await axios.put(`https://ims-project-server.onrender.com/api/inventories/${id}`, { ...inventory, version: inventory.version }, config);
 //         setSuccess('Inventory updated successfully');
 //       } else {
-//         const res = await axios.post('http://localhost:5000/api/inventories', inventory, config);
+//         const res = await axios.post('https://ims-project-server.onrender.com/api/inventories', inventory, config);
 //         setSuccess('Inventory created successfully');
 //         navigate(`/inventories/${res.data._id}`);
 //       }
@@ -223,7 +223,7 @@ const InventoryForm = () => {
   const fetchInventory = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`http://localhost:5000/api/inventories/${id}`, {
+      const res = await axios.get(`https://ims-project-server.onrender.com/api/inventories/${id}`, {
         headers: { Authorization: token ? `Bearer ${token}` : '' },
       });
       setInventory(res.data);
@@ -320,10 +320,10 @@ const InventoryForm = () => {
       };
 
       if (id) {
-        await axios.put(`http://localhost:5000/api/inventories/${id}`, { ...inventory, version: inventory.version }, config);
+        await axios.put(`https://ims-project-server.onrender.com/api/inventories/${id}`, { ...inventory, version: inventory.version }, config);
         setSuccess('Inventory updated successfully');
       } else {
-        const res = await axios.post('http://localhost:5000/api/inventories', inventory, config);
+        const res = await axios.post('https://ims-project-server.onrender.com/api/inventories', inventory, config);
         setSuccess('Inventory created successfully');
         navigate(`/inventories/${res.data._id}`);
       }
@@ -345,7 +345,7 @@ const InventoryForm = () => {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
       };
 
-      await axios.put(`http://localhost:5000/api/inventories/${id}`, inventory, config);
+      await axios.put(`https://ims-project-server.onrender.com/api/inventories/${id}`, inventory, config);
       setSuccess('Fields saved successfully');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to save fields');

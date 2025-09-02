@@ -22,7 +22,7 @@ const ItemList = ({ inventoryId }) => {
   const fetchInventory = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`http://localhost:5000/api/inventories/${inventoryId}`, {
+      const res = await axios.get(`https://ims-project-server.onrender.com/api/inventories/${inventoryId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setInventory(res.data || { fields: [] });
@@ -37,7 +37,7 @@ const ItemList = ({ inventoryId }) => {
       setLoading(true);
       const token = localStorage.getItem('token');
       const res = await axios.get(
-        `http://localhost:5000/api/items/inventory/${inventoryId}?page=${currentPage}&limit=10`,
+        `https://ims-project-server.onrender.com/api/items/inventory/${inventoryId}?page=${currentPage}&limit=10`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setItems(Array.isArray(res.data.items) ? res.data.items : []);
@@ -56,7 +56,7 @@ const ItemList = ({ inventoryId }) => {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:5000/api/items/${itemId}`, {
+      await axios.delete(`https://ims-project-server.onrender.com/api/items/${itemId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchItems();
@@ -76,7 +76,7 @@ const ItemList = ({ inventoryId }) => {
       const token = localStorage.getItem('token');
       await Promise.all(
         Array.from(selectedItems).map((itemId) =>
-          axios.delete(`http://localhost:5000/api/items/${itemId}`, {
+          axios.delete(`https://ims-project-server.onrender.com/api/items/${itemId}`, {
             headers: { Authorization: `Bearer ${token}` },
           })
         )

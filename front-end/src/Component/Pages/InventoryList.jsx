@@ -33,11 +33,11 @@ const InventoryList = ({ type = 'all', title }) => {
       };
 
       if (type === 'my') {
-        url = `http://localhost:5000/api/inventories/my?page=${currentPage}&limit=6`;
+        url = `https://ims-project-server.onrender.com/api/inventories/my?page=${currentPage}&limit=6`;
       } else if (type === 'shared') {
-        url = `http://localhost:5000/api/inventories/shared?page=${currentPage}&limit=6`;
+        url = `https://ims-project-server.onrender.com/api/inventories/shared?page=${currentPage}&limit=6`;
       } else {
-        url = `http://localhost:5000/api/inventories?page=${currentPage}&limit=6`;
+        url = `https://ims-project-server.onrender.com/api/inventories?page=${currentPage}&limit=6`;
       }
 
       const res = await axios.get(url, config);

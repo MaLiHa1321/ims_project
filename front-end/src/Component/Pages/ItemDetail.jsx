@@ -24,7 +24,7 @@ const ItemDetail = () => {
       setLoading(true);
       const token = localStorage.getItem('token');
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      const res = await axios.get(`http://localhost:5000/api/items/${itemId}`, config);
+      const res = await axios.get(`https://ims-project-server.onrender.com/api/items/${itemId}`, config);
       setItem(res.data);
     } catch (err) {
       console.error('Error fetching item:', err);
@@ -38,7 +38,7 @@ const ItemDetail = () => {
     try {
       const token = localStorage.getItem('token');
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      const res = await axios.get(`http://localhost:5000/api/inventories/${inventoryId}`, config);
+      const res = await axios.get(`https://ims-project-server.onrender.com/api/inventories/${inventoryId}`, config);
       setInventory(res.data);
     } catch (err) {
       console.error('Error fetching inventory:', err);
@@ -51,7 +51,7 @@ const ItemDetail = () => {
     try {
       const token = localStorage.getItem('token');
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.delete(`http://localhost:5000/api/items/${itemId}`, config);
+      await axios.delete(`https://ims-project-server.onrender.com/api/items/${itemId}`, config);
       navigate(`/inventories/${inventoryId}`);
     } catch (err) {
       console.error('Error deleting item:', err);

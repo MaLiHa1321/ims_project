@@ -38,7 +38,7 @@ const ItemForm = ({ inventoryId: propInventoryId, itemId, onSave }) => {
     try {
       const token = localStorage.getItem('token');
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      const res = await axios.get(`http://localhost:5000/api/inventories/${inventoryId}`, config);
+      const res = await axios.get(`https://ims-project-server.onrender.com/api/inventories/${inventoryId}`, config);
       setInventory(res.data);
     } catch (err) {
       setError('Failed to load inventory');
@@ -50,7 +50,7 @@ const ItemForm = ({ inventoryId: propInventoryId, itemId, onSave }) => {
       setLoading(true);
       const token = localStorage.getItem('token');
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      const res = await axios.get(`http://localhost:5000/api/items/${itemId}`, config);
+      const res = await axios.get(`https://ims-project-server.onrender.com/api/items/${itemId}`, config);
 
       // Map backend data into local state
       setItem({
@@ -104,8 +104,8 @@ const ItemForm = ({ inventoryId: propInventoryId, itemId, onSave }) => {
       }
 
       const res = itemId
-        ? await axios.put(`http://localhost:5000/api/items/${itemId}`, payload, config)
-        : await axios.post(`http://localhost:5000/api/items`, payload, config);
+        ? await axios.put(`https://ims-project-server.onrender.com/api/items/${itemId}`, payload, config)
+        : await axios.post(`https://ims-project-server.onrender.com/api/items`, payload, config);
 
       if (onSave) onSave(res.data);
       else navigate(`/inventories/${inventoryId}`);

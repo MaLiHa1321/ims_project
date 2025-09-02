@@ -33,7 +33,7 @@ const AdminDashboard = () => {
         }
       };
 
-      const res = await axios.get(`http://localhost:5000/api/admin/users?page=${currentPage}&limit=10`, config);
+      const res = await axios.get(`https://ims-project-server.onrender.com/api/admin/users?page=${currentPage}&limit=10`, config);
       setUsers(res.data.users);
       setTotalPages(res.data.totalPages);
     } catch (error) {
@@ -89,7 +89,7 @@ const AdminDashboard = () => {
         }
       };
 
-      await axios.put(`http://localhost:5000//api/admin/users/${selectedUser._id}`, formData, config);
+      await axios.put(`https://ims-project-server.onrender.com//api/admin/users/${selectedUser._id}`, formData, config);
       setSuccess('User updated successfully');
       fetchUsers();
       handleCloseModal();
@@ -112,7 +112,7 @@ const AdminDashboard = () => {
         }
       };
 
-      await axios.delete(`http://localhost:5000/api/admin/users/${userId}`, config);
+      await axios.delete(`https://ims-project-server.onrender.com/api/admin/users/${userId}`, config);
       setSuccess('User deleted successfully');
       fetchUsers();
     } catch (error) {
@@ -141,7 +141,7 @@ const AdminDashboard = () => {
         }
       };
 
-      await axios.post(`http://localhost:5000/api/admin/users/${userId}/reset-password`, { newPassword }, config);
+      await axios.post(`https://ims-project-server.onrender.com/api/admin/users/${userId}/reset-password`, { newPassword }, config);
       setSuccess('Password reset successfully');
     } catch (error) {
       setError(error.response?.data?.message || 'Failed to reset password');
@@ -160,7 +160,7 @@ const AdminDashboard = () => {
         }
       };
 
-      await axios.post(`http://localhost:5000/api/admin/users/${userId}/unlock`, {}, config);
+      await axios.post(`https://ims-project-server.onrender.com/api/admin/users/${userId}/unlock`, {}, config);
       setSuccess('User account unlocked successfully');
       fetchUsers();
     } catch (error) {

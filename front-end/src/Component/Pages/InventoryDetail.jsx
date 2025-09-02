@@ -31,7 +31,7 @@ useEffect(() => {
       setStatsLoading(true);
       const token = localStorage.getItem('token');
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      const res = await axios.get(`http://localhost:5000/api/stats/inventory/${id}`, config);
+      const res = await axios.get(`https://ims-project-server.onrender.com/api/stats/inventory/${id}`, config);
       setStats(res.data);
     } catch (error) {
       console.error('Error fetching stats:', error);
@@ -81,7 +81,7 @@ useEffect(() => {
       };
 
       // Use relative URL to avoid CORS issues
-      const res = await axios.get(`http://localhost:5000/api/inventories/${id}`, config);
+      const res = await axios.get(`https://ims-project-server.onrender.com/api/inventories/${id}`, config);
       setInventory(res.data);
     } catch (error) {
       console.error('Error fetching inventory:', error);

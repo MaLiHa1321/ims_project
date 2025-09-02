@@ -28,7 +28,7 @@ const Login = () => {
       };
 
       const body = JSON.stringify({ email, password });
-      const res = await axios.post('http://localhost:5000/api/auth/login', body, config);
+      const res = await axios.post('https://ims-project-server.onrender.com/api/auth/login', body, config);
       
       localStorage.setItem('token', res.data.token);
     

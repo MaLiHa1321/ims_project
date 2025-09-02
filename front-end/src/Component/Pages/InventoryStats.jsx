@@ -35,7 +35,7 @@ const refreshStats = () => {
         },
       };
 
-      const res = await axios.get(`http://localhost:5000/api/stats/inventory/${inventoryId}`, config);
+      const res = await axios.get(`https://ims-project-server.onrender.com/api/stats/inventory/${inventoryId}`, config);
       setStats(res.data);
     } catch (error) {
       console.error('Error fetching statistics:', error);

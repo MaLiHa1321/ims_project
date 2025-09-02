@@ -35,7 +35,7 @@ const Register = () => {
       };
 
       const body = JSON.stringify({ username, email, password });
-      const res = await axios.post('http://localhost:5000/api/auth/register', body, config);
+      const res = await axios.post('https://ims-project-server.onrender.com/api/auth/register', body, config);
       
       localStorage.setItem('token', res.data.token);
       setLoading(false);

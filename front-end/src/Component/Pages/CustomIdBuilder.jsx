@@ -34,7 +34,7 @@ const CustomIdBuilder = ({ inventoryId, customIdFormat, onChange }) => {
     try {
       const token = localStorage.getItem('token');
      await axios.put(
-  `http://localhost:5000/api/inventories/${inventoryId}`,
+  `https://ims-project-server.onrender.com/api/inventories/${inventoryId}`,
   { customIdFormat: elements, version: inventoryVersion },
   {
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
