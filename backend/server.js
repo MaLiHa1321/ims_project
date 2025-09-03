@@ -29,6 +29,8 @@ app.use('/api/admin', require('./router/admin'));
 app.use('/api/items', require('./router/items'));
 // backend/server.js - Add this line
 app.use('/api/stats', require('./router/stats'));
+
+app.use('/api/search', require('./router/search'));
 // MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('MongoDB connected'))

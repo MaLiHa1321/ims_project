@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Button, Row, Col, Spinner, Pagination, Alert } from 'react-bootstrap';
+import { Table, Button, Spinner, Pagination, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -19,7 +19,7 @@ const InventoryList = ({ type = 'all', title }) => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      
+
       if (!token) {
         navigate('/login');
         return;
@@ -27,9 +27,7 @@ const InventoryList = ({ type = 'all', title }) => {
 
       let url = '';
       const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       };
 
       if (type === 'my') {
@@ -87,63 +85,45 @@ const InventoryList = ({ type = 'all', title }) => {
       </div>
 
       {inventories.length === 0 ? (
-        <Card>
-          <Card.Body className="text-center py-5">
-            <h4>No inventories found</h4>
-            <p className="text-muted">
-              {type === 'my'
-                ? "You haven't created any inventories yet."
-                : type === 'shared'
-                ? "You don't have access to any shared inventories."
-                : 'No inventories available.'}
-            </p>
-            {type === 'my' && (
-              <Button as={Link} to="/inventories/new" variant="primary">
-                Create Your First Inventory
-              </Button>
-            )}
-          </Card.Body>
-        </Card>
+        <Alert variant="info" className="text-center">
+          {type === 'my'
+            ? "You haven't created any inventories yet."
+            : type === 'shared'
+            ? "You don't have access to any shared inventories."
+            : 'No inventories available.'}
+        </Alert>
       ) : (
         <>
-          <Row>
-            {inventories.map((inventory) => (
-              <Col key={inventory._id} md={6} lg={4} className="mb-4">
-                <Card className="h-100">
-                  <Card.Body>
-                    <Card.Title>{inventory.title}</Card.Title>
-                    <Card.Text className="text-muted">
-                      {inventory.description && inventory.description.length > 100
-                        ? `${inventory.description.substring(0, 100)}...`
-                        : inventory.description || 'No description'}
-                    </Card.Text>
-                    <div className="mb-2">
-                      <span className="badge bg-secondary">{inventory.category}</span>
-                      {inventory.isPublic && (
-                        <span className="badge bg-info ms-1">Public</span>
-                      )}
-                    </div>
-                    <Card.Text>
-                      <small className="text-muted">
-                        Created by: {inventory.createdBy?.username || 'Unknown'}
-                      </small>
-                    </Card.Text>
-                  </Card.Body>
-                  <Card.Footer>
-                    <div className="d-grid">
-                      <Button
-                        as={Link}
-                        to={`/inventories/${inventory._id}`}
-                        variant="outline-primary"
-                      >
-                        View Inventory
-                      </Button>
-                    </div>
-                  </Card.Footer>
-                </Card>
-              </Col>
-            ))}
-          </Row>
+          <Table striped bordered hover responsive>
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Visibility</th>
+                <th>Created By</th>
+              </tr>
+            </thead>
+            <tbody>
+              {inventories.map((inventory) => (
+                <tr
+                  key={inventory._id}
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => navigate(`/inventories/${inventory._id}`)}
+                >
+                  <td>{inventory.title}</td>
+                  <td>
+                    {inventory.description && inventory.description.length > 50
+                      ? `${inventory.description.substring(0, 50)}...`
+                      : inventory.description || 'No description'}
+                  </td>
+                  <td>{inventory.category}</td>
+                  <td>{inventory.isPublic ? 'Public' : 'Private'}</td>
+                  <td>{inventory.createdBy?.username || 'Unknown'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
 
           {totalPages > 1 && (
             <div className="d-flex justify-content-center mt-4">

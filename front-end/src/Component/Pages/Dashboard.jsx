@@ -3,15 +3,12 @@ import { Container, Row, Col, Card, Button, Spinner, Alert } from 'react-bootstr
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import InventoryList from '../Pages/InventoryList';
-import InventoryStats from './InventoryStats';
-import InventoryStatsChart from './InventoryStatsChart';
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
     myInventories: 0,
     sharedInventories: 0,
     totalItems: 0,
-    inventories: [] // 👈 will hold detailed inventory stats from /api/stats
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -38,23 +35,10 @@ const Dashboard = () => {
         axios.get('https://ims-project-server.onrender.com/api/inventories/shared?limit=1', config),
       ]);
 
-      // Fetch detailed stats
-      let statsRes = { data: [] };
-      try {
-        statsRes = await axios.get('https://ims-project-server.onrender.com/api/stats', config);
-      } catch (itemsError) {
-        console.warn('Could not fetch item stats:', itemsError);
-        setStatsError('Item statistics temporarily unavailable');
-      }
-
-      const inventories = statsRes.data || [];
-      const totalItems = inventories.reduce((sum, inv) => sum + (inv.totalItems || 0), 0);
-
       setStats({
         myInventories: myRes.data.totalInventories,
         sharedInventories: sharedRes.data.totalInventories,
-        totalItems,
-        inventories // 👈 keep full array for charts
+        totalItems: 0, // 👈 since InventoryStats is removed, we don’t need detailed stats
       });
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
@@ -91,7 +75,7 @@ const Dashboard = () => {
 
       {/* Stats Cards */}
       <Row className="mb-5">
-        <Col md={4} className="mb-3">
+        <Col md={6} className="mb-3">
           <Card className="text-center h-100">
             <Card.Body>
               <Card.Title as="h2">{stats.myInventories}</Card.Title>
@@ -105,22 +89,7 @@ const Dashboard = () => {
           </Card>
         </Col>
 
-        <Col md={4} className="mb-3">
-          <Card className="text-center h-100">
-            <Card.Body>
-              <Card.Title as="h2">{stats.totalItems}</Card.Title>
-              <Card.Text>Total Items</Card.Text>
-              {statsError && <small className="text-muted d-block mt-1">Estimate only</small>}
-            </Card.Body>
-            <Card.Footer>
-              <Button variant="outline-primary" size="sm" disabled>
-                View Items
-              </Button>
-            </Card.Footer>
-          </Card>
-        </Col>
-
-        <Col md={4} className="mb-3">
+        <Col md={6} className="mb-3">
           <Card className="text-center h-100">
             <Card.Body>
               <Card.Title as="h2">{stats.sharedInventories}</Card.Title>
@@ -132,22 +101,6 @@ const Dashboard = () => {
               </Button>
             </Card.Footer>
           </Card>
-        </Col>
-      </Row>
-
-      {/* Inventory Stats + Chart */}
-      <Row className="mb-5">
-        <Col>
-          <h3>Inventory Stats Overview</h3>
-          {statsError ? (
-            <Alert variant="danger">{statsError}</Alert>
-          ) : (
-            <>
-              <InventoryStats stats={stats} />
-              <InventoryStatsChart inventories={stats.inventories} /> 
-              {/* 👆 pass inventories array instead of single stats */}
-            </>
-          )}
         </Col>
       </Row>
 

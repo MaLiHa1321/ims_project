@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Card, Spinner, Alert, Tabs, Tab, Button, Container, Badge } from 'react-bootstrap';
+import { Card, Spinner, Alert, Tabs, Tab,Modal, Button, Container, Badge } from 'react-bootstrap';
 import axios from 'axios';
 import ItemList from './ItemList';
 import ItemForm from './ItemForm';
@@ -226,7 +226,7 @@ useEffect(() => {
             </Card>
           </Tab>
        
-<Tab eventKey="items" title="Items">
+{/* <Tab eventKey="items" title="Items">
   <div className="d-flex justify-content-between align-items-center mb-3">
     <h4>Items</h4>
     <Button onClick={() => setShowItemModal(true)}>
@@ -234,14 +234,13 @@ useEffect(() => {
     </Button>
   </div>
 
-  {/* Only render ItemList if inventory is loaded */}
+ 
   {inventory?._id ? (
     <ItemList inventoryId={inventory._id} />
   ) : (
     <p>Loading items...</p>
   )}
 
-  {/* Item Modal */}
   {showItemModal && (
     <div className="modal-backdrop show">
       <div className="modal d-block">
@@ -277,8 +276,51 @@ useEffect(() => {
       </div>
     </div>
   )}
-</Tab>
+</Tab> */}
 
+
+<Tab eventKey="items" title="Items">
+  <div className="d-flex justify-content-between align-items-center mb-3">
+    <h4>Items</h4>
+    <Button onClick={() => setShowItemModal(true)}>Add New Item</Button>
+  </div>
+
+  {/* Only render ItemList if inventory is loaded */}
+  {inventory?._id ? (
+    <ItemList inventoryId={inventory._id} />
+  ) : (
+    <p>Loading items...</p>
+  )}
+
+  {/* Item Modal (React Bootstrap) */}
+  <Modal
+    show={showItemModal}
+    onHide={() => {
+      setShowItemModal(false);
+      setEditingItem(null);
+    }}
+    size="lg"
+    centered
+    backdrop="static" // prevents closing on backdrop click
+  >
+    <Modal.Header closeButton>
+      <Modal.Title>
+        {editingItem ? "Edit Item" : "Add New Item"}
+      </Modal.Title>
+    </Modal.Header>
+    <Modal.Body>
+      <ItemForm
+        inventoryId={inventory._id}
+        itemId={editingItem}
+        onSave={() => {
+          setShowItemModal(false);
+          setEditingItem(null);
+          window.location.reload(); // or trigger refetch instead of reload
+        }}
+      />
+    </Modal.Body>
+  </Modal>
+</Tab>
           <Tab eventKey="idFormat" title="Custom ID Format">
             <Card>
               <Card.Body>

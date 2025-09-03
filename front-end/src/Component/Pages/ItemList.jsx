@@ -22,9 +22,10 @@ const ItemList = ({ inventoryId }) => {
   const fetchInventory = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`https://ims-project-server.onrender.com/api/inventories/${inventoryId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await axios.get(
+        `https://ims-project-server.onrender.com/api/inventories/${inventoryId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       setInventory(res.data || { fields: [] });
     } catch (err) {
       console.error('Error fetching inventory:', err);
@@ -56,9 +57,10 @@ const ItemList = ({ inventoryId }) => {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`https://ims-project-server.onrender.com/api/items/${itemId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.delete(
+        `https://ims-project-server.onrender.com/api/items/${itemId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       fetchItems();
       setSelectedItems((prev) => {
         const newSet = new Set(prev);
@@ -119,7 +121,25 @@ const ItemList = ({ inventoryId }) => {
           <Col>
             <div className="d-flex align-items-center gap-2 p-2 bg-light rounded">
               <span>{selectedItems.size} item(s) selected</span>
-              <Button variant="outline-danger" size="sm" onClick={() => setShowDeleteConfirm(true)}>
+
+              {/* Show View button only if exactly 1 row is selected */}
+              {selectedItems.size === 1 && (
+                <Button
+                  as={Link}
+                  to={`/inventories/${inventoryId}/items/${Array.from(selectedItems)[0]}`}
+                  variant="outline-primary"
+                  size="sm"
+                >
+                  View
+                </Button>
+              )}
+
+              {/* Delete Selected */}
+              <Button
+                variant="outline-danger"
+                size="sm"
+                onClick={() => setShowDeleteConfirm(true)}
+              >
                 Delete Selected
               </Button>
             </div>
@@ -152,7 +172,6 @@ const ItemList = ({ inventoryId }) => {
               <th>Custom ID</th>
               {tableFields.map(field => <th key={field._id}>{field.title}</th>)}
               <th>Created</th>
-              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -186,13 +205,6 @@ const ItemList = ({ inventoryId }) => {
                     );
                   })}
                   <td>{new Date(item.createdAt).toLocaleDateString()}</td>
-                  <td>
-                    <div className="d-flex gap-1">
-                      <Button as={Link} to={`/inventories/${inventoryId}/items/${item._id}`} variant="outline-primary" size="sm">View</Button>
-                      <Button as={Link} to={`/inventories/${inventoryId}/items/${item._id}/edit`} variant="outline-secondary" size="sm">Edit</Button>
-                      <Button variant="outline-danger" size="sm" onClick={() => handleDelete(item._id)}>Delete</Button>
-                    </div>
-                  </td>
                 </tr>
               ))
             )}
@@ -205,7 +217,11 @@ const ItemList = ({ inventoryId }) => {
           <Pagination>
             <Pagination.Prev disabled={currentPage === 1} onClick={() => handlePageChange(currentPage - 1)} />
             {[...Array(totalPages)].map((_, idx) => (
-              <Pagination.Item key={idx + 1} active={currentPage === idx + 1} onClick={() => handlePageChange(idx + 1)}>
+              <Pagination.Item
+                key={idx + 1}
+                active={currentPage === idx + 1}
+                onClick={() => handlePageChange(idx + 1)}
+              >
                 {idx + 1}
               </Pagination.Item>
             ))}

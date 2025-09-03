@@ -1,20 +1,49 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Navbar, Nav, Offcanvas, Badge } from 'react-bootstrap';
+import { Container, Navbar, Nav, Offcanvas, Badge, Button, Form, ListGroup } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import './Layout.css';
 
 const Layout = ({ children }) => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light'); 
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
   const token = localStorage.getItem('token');
 
   useEffect(() => {
-    // Get user data from localStorage if available
     const userData = localStorage.getItem('user');
-    if (userData) {
-      setUser(JSON.parse(userData));
-    }
+    if (userData) setUser(JSON.parse(userData));
   }, [token]);
+
+  useEffect(() => {
+    document.body.setAttribute('data-bs-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  // Fetch search results from backend
+  useEffect(() => {
+    const fetchResults = async () => {
+      if (!searchQuery.trim()) {
+        setSearchResults([]);
+        return;
+      }
+      try {
+        const config = { headers: { Authorization: `Bearer ${token}` } };
+        const res = await axios.get(
+          `https://ims-project-server.onrender.com/api/search?q=${searchQuery}`,
+          config
+        );
+        setSearchResults(res.data || []);
+      } catch (err) {
+        console.error('Search error:', err);
+      }
+    };
+
+    const debounce = setTimeout(fetchResults, 300); // debounce
+    return () => clearTimeout(debounce);
+  }, [searchQuery, token]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -23,13 +52,13 @@ const Layout = ({ children }) => {
     navigate('/login');
   };
 
+  const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
+
   return (
     <>
-      <Navbar bg="dark" variant="dark" expand="lg" className="mb-4">
+      <Navbar bg={theme === 'dark' ? 'dark' : 'light'} variant={theme === 'dark' ? 'dark' : 'light'} expand="lg" className="mb-4">
         <Container fluid>
-          <Navbar.Brand as={Link} to="/">
-            📦 Inventory Manager
-          </Navbar.Brand>
+          <Navbar.Brand as={Link} to="/">📦 Inventory Manager</Navbar.Brand>
           <Navbar.Toggle aria-controls="offcanvasNavbar" />
           <Navbar.Offcanvas
             id="offcanvasNavbar"
@@ -37,51 +66,71 @@ const Layout = ({ children }) => {
             placement="end"
           >
             <Offcanvas.Header closeButton>
-              <Offcanvas.Title id="offcanvasNavbarLabel">
-                Inventory Manager
-              </Offcanvas.Title>
+              <Offcanvas.Title id="offcanvasNavbarLabel">Inventory Manager</Offcanvas.Title>
             </Offcanvas.Header>
             <Offcanvas.Body>
               <Nav className="justify-content-end flex-grow-1 pe-3">
-                <Nav.Link as={Link} to="/">
-                  Home
-                </Nav.Link>
-                
+
+                {/* Existing links */}
+                <Nav.Link as={Link} to="/">Home</Nav.Link>
                 {token ? (
                   <>
-                    <Nav.Link as={Link} to="/dashboard">
-                      Dashboard
-                    </Nav.Link>
-                    <Nav.Link as={Link} to="/inventories">
-                      My Inventories
-                    </Nav.Link>
-                    <Nav.Link as={Link} to="/inventories/new">
-                      Create Inventory
-                    </Nav.Link>
-                    
+                    <Nav.Link as={Link} to="/dashboard">Dashboard</Nav.Link>
                     {user && user.isAdmin && (
                       <Nav.Link as={Link} to="/admin">
                         Admin <Badge bg="danger">Admin</Badge>
                       </Nav.Link>
                     )}
-                    
-                    <Nav.Link onClick={handleLogout}>
-                      Logout
-                    </Nav.Link>
-                    
-                    <Nav.Link className="text-muted">
-                      Signed in as: {user?.username}
-                    </Nav.Link>
+                    <Nav.Link onClick={handleLogout}>Logout</Nav.Link>
                   </>
                 ) : (
                   <>
-                    <Nav.Link as={Link} to="/login">
-                      Login
-                    </Nav.Link>
-                    <Nav.Link as={Link} to="/register">
-                      Register
-                    </Nav.Link>
+                    <Nav.Link as={Link} to="/login">Login</Nav.Link>
+                    <Nav.Link as={Link} to="/register">Register</Nav.Link>
                   </>
+                )}
+
+                {/* Theme Toggle */}
+                <Button
+                  variant={theme === 'dark' ? 'secondary' : 'outline-secondary'}
+                  size="sm"
+                  className="ms-2"
+                  onClick={toggleTheme}
+                >
+                  {theme === 'dark' ? '🌙 Dark' : '☀️ Light'}
+                </Button>
+
+                {/* Global Search */}
+                {token && (
+                  <div className="ms-3 position-relative">
+                    <Form.Control
+                      type="search"
+                      placeholder="Search inventories/items..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      autoComplete="off"
+                    />
+                    {searchResults.length > 0 && (
+                      <ListGroup
+                        className="position-absolute w-100 zindex-tooltip"
+                        style={{ top: '38px' }}
+                      >
+                        {searchResults.map(result => (
+                          <ListGroup.Item
+                            key={result._id}
+                            action
+                            onClick={() => {
+                              navigate(result.url);
+                              setSearchQuery('');
+                              setSearchResults([]);
+                            }}
+                          >
+                            {result.title}
+                          </ListGroup.Item>
+                        ))}
+                      </ListGroup>
+                    )}
+                  </div>
                 )}
               </Nav>
             </Offcanvas.Body>
@@ -89,13 +138,13 @@ const Layout = ({ children }) => {
         </Container>
       </Navbar>
 
-      <Container fluid="md" className="main-content">
-        {children}
-      </Container>
+      <Container fluid="md" className="main-content">{children}</Container>
 
-      <footer className="bg-dark text-light text-center py-3 mt-5">
+      <footer className={`text-center py-3 mt-5 bg-${theme}`}>
         <Container>
-          <p className="mb-0">Inventory Management System &copy; 2023</p>
+          <p className={`mb-0 text-${theme === 'dark' ? 'light' : 'dark'}`}>
+            Inventory Management System &copy; 2025
+          </p>
         </Container>
       </footer>
     </>

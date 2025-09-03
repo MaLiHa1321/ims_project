@@ -3,12 +3,11 @@ import { Form, Button, Card, Alert, Spinner } from 'react-bootstrap';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 
-const ItemForm = ({ inventoryId: propInventoryId, itemId, onSave }) => {
+const ItemForm = ({ inventoryId: propInventoryId, onSave }) => {
   const { id: routeId } = useParams();
   const inventoryId = propInventoryId || routeId;
 
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [inventory, setInventory] = useState(null);
@@ -16,12 +15,6 @@ const ItemForm = ({ inventoryId: propInventoryId, itemId, onSave }) => {
     title: '',
     description: '',
     quantity: 0,
-    version: 0,
-    textFields: [],
-    textareaFields: [],
-    numberFields: [],
-    booleanFields: [],
-    documentFields: [],
   });
 
   useEffect(() => {
@@ -30,44 +23,20 @@ const ItemForm = ({ inventoryId: propInventoryId, itemId, onSave }) => {
       return;
     }
     fetchInventory();
-    if (itemId) fetchItem();
-    // eslint-disable-next-line
-  }, [inventoryId, itemId]);
+  
+  }, [inventoryId]);
 
   const fetchInventory = async () => {
     try {
       const token = localStorage.getItem('token');
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      const res = await axios.get(`https://ims-project-server.onrender.com/api/inventories/${inventoryId}`, config);
+      const res = await axios.get(
+        `https://ims-project-server.onrender.com/api/inventories/${inventoryId}`,
+        config
+      );
       setInventory(res.data);
     } catch (err) {
       setError('Failed to load inventory');
-    }
-  };
-
-  const fetchItem = async () => {
-    try {
-      setLoading(true);
-      const token = localStorage.getItem('token');
-      const config = { headers: { Authorization: `Bearer ${token}` } };
-      const res = await axios.get(`https://ims-project-server.onrender.com/api/items/${itemId}`, config);
-
-      // Map backend data into local state
-      setItem({
-        title: res.data.title || '',
-        description: res.data.description || '',
-        quantity: res.data.quantity || 0,
-        version: res.data.version || 0,
-        textFields: res.data.textFields || [],
-        textareaFields: res.data.textareaFields || [],
-        numberFields: res.data.numberFields || [],
-        booleanFields: res.data.booleanFields || [],
-        documentFields: res.data.documentFields || [],
-      });
-    } catch (err) {
-      setError('Failed to load item');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -78,34 +47,22 @@ const ItemForm = ({ inventoryId: propInventoryId, itemId, onSave }) => {
 
     try {
       const token = localStorage.getItem('token');
-      const config = { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } };
+      const config = {
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      };
 
-      // Prepare payload differently for create (POST) vs update (PUT)
-      let payload;
-      if (itemId) {
-        payload = {
-          title: item.title,
-          description: item.description,
-          quantity: item.quantity,
-          version: item.version,
-          textFields: item.textFields,
-          textareaFields: item.textareaFields,
-          numberFields: item.numberFields,
-          booleanFields: item.booleanFields,
-          documentFields: item.documentFields,
-        };
-      } else {
-        payload = {
-          inventory: inventoryId,
-          title: item.title,
-          description: item.description,
-          quantity: item.quantity,
-        };
-      }
+      const payload = {
+        inventory: inventoryId,
+        title: item.title,
+        description: item.description,
+        quantity: item.quantity,
+      };
 
-      const res = itemId
-        ? await axios.put(`https://ims-project-server.onrender.com/api/items/${itemId}`, payload, config)
-        : await axios.post(`https://ims-project-server.onrender.com/api/items`, payload, config);
+      const res = await axios.post(
+        `https://ims-project-server.onrender.com/api/items`,
+        payload,
+        config
+      );
 
       if (onSave) onSave(res.data);
       else navigate(`/inventories/${inventoryId}`);
@@ -116,13 +73,12 @@ const ItemForm = ({ inventoryId: propInventoryId, itemId, onSave }) => {
     }
   };
 
-  if (loading) return <div className="text-center py-4"><Spinner animation="border" /></div>;
   if (!inventory) return <Alert variant="warning">Inventory not found</Alert>;
 
   return (
     <Card>
       <Card.Header>
-        <h3>{itemId ? 'Edit Item' : 'Add New Item'}</h3>
+        <h3>Add New Item</h3>
         <p className="text-muted mb-0">Inventory: {inventory?.title || 'Loading...'}</p>
       </Card.Header>
       <Card.Body>
@@ -163,31 +119,9 @@ const ItemForm = ({ inventoryId: propInventoryId, itemId, onSave }) => {
             />
           </Form.Group>
 
-          {/* You can add dynamic field editors here if needed */}
-          {/* Example for textFields */}
-          {inventory.fields?.filter(f => f.type === 'text').map(field => {
-            const value = item.textFields.find(fv => fv.fieldId === field._id)?.value || '';
-            return (
-              <Form.Group className="mb-3" key={field._id}>
-                <Form.Label>{field.title}</Form.Label>
-                <Form.Control
-                  type="text"
-                  value={value}
-                  onChange={(e) => {
-                    const newFields = [...item.textFields];
-                    const idx = newFields.findIndex(fv => fv.fieldId === field._id);
-                    if (idx >= 0) newFields[idx].value = e.target.value;
-                    else newFields.push({ fieldId: field._id, value: e.target.value });
-                    setItem({ ...item, textFields: newFields });
-                  }}
-                />
-              </Form.Group>
-            );
-          })}
-
           <div className="d-flex gap-2">
             <Button variant="primary" type="submit" disabled={saving}>
-              {saving ? 'Saving...' : itemId ? 'Update Item' : 'Create Item'}
+              {saving ? 'Saving...' : 'Create Item'}
             </Button>
             <Button variant="secondary" as={Link} to={`/inventories/${inventoryId}`}>
               Cancel
