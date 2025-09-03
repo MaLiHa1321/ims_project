@@ -7,10 +7,19 @@ import './Layout.css';
 const Layout = ({ children }) => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
-  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light'); 
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const token = localStorage.getItem('token');
+
+  const staticSearchData = [
+    { title: 'Manage Your Inventory with Ease', type: 'static', url: '/' },
+    { title: 'Track, organize, and manage all your items', type: 'static', url: '/' },
+    { title: 'Create custom inventories with fields tailored to your needs', type: 'static', url: '/' },
+    { title: 'Find exactly what you need with our powerful full-text search', type: 'static', url: '/' },
+    { title: 'Share inventories with team members and control access levels', type: 'static', url: '/' }
+ 
+  ];
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -21,27 +30,37 @@ const Layout = ({ children }) => {
     document.body.setAttribute('data-bs-theme', theme);
     localStorage.setItem('theme', theme);
   }, [theme]);
-
-  // Fetch search results from backend
   useEffect(() => {
     const fetchResults = async () => {
       if (!searchQuery.trim()) {
         setSearchResults([]);
         return;
       }
+
       try {
-        const config = { headers: { Authorization: `Bearer ${token}` } };
-        const res = await axios.get(
-          `https://ims-project-server.onrender.com/api/search?q=${searchQuery}`,
-          config
+
+        let dynamicResults = [];
+        if (token) {
+          const config = { headers: { Authorization: `Bearer ${token}` } };
+          const res = await axios.get(
+            `https://ims-project-server.onrender.com/api/search?q=${encodeURIComponent(searchQuery)}`,
+            config
+          );
+          dynamicResults = res.data || [];
+        }
+
+   
+        const staticResults = staticSearchData.filter(entry =>
+          entry.title.toLowerCase().includes(searchQuery.toLowerCase())
         );
-        setSearchResults(res.data || []);
+
+        setSearchResults([...dynamicResults, ...staticResults]);
       } catch (err) {
         console.error('Search error:', err);
       }
     };
 
-    const debounce = setTimeout(fetchResults, 300); // debounce
+    const debounce = setTimeout(fetchResults, 300); 
     return () => clearTimeout(debounce);
   }, [searchQuery, token]);
 
@@ -56,7 +75,12 @@ const Layout = ({ children }) => {
 
   return (
     <>
-      <Navbar bg={theme === 'dark' ? 'dark' : 'light'} variant={theme === 'dark' ? 'dark' : 'light'} expand="lg" className="mb-4">
+      <Navbar
+        bg={theme === 'dark' ? 'dark' : 'light'}
+        variant={theme === 'dark' ? 'dark' : 'light'}
+        expand="lg"
+        className="mb-4"
+      >
         <Container fluid>
           <Navbar.Brand as={Link} to="/">📦 Inventory Manager</Navbar.Brand>
           <Navbar.Toggle aria-controls="offcanvasNavbar" />
@@ -71,8 +95,8 @@ const Layout = ({ children }) => {
             <Offcanvas.Body>
               <Nav className="justify-content-end flex-grow-1 pe-3">
 
-                {/* Existing links */}
                 <Nav.Link as={Link} to="/">Home</Nav.Link>
+
                 {token ? (
                   <>
                     <Nav.Link as={Link} to="/dashboard">Dashboard</Nav.Link>
@@ -100,38 +124,37 @@ const Layout = ({ children }) => {
                   {theme === 'dark' ? '🌙 Dark' : '☀️ Light'}
                 </Button>
 
-                {/* Global Search */}
-                {token && (
-                  <div className="ms-3 position-relative">
-                    <Form.Control
-                      type="search"
-                      placeholder="Search inventories/items..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      autoComplete="off"
-                    />
-                    {searchResults.length > 0 && (
-                      <ListGroup
-                        className="position-absolute w-100 zindex-tooltip"
-                        style={{ top: '38px' }}
-                      >
-                        {searchResults.map(result => (
-                          <ListGroup.Item
-                            key={result._id}
-                            action
-                            onClick={() => {
-                              navigate(result.url);
-                              setSearchQuery('');
-                              setSearchResults([]);
-                            }}
-                          >
-                            {result.title}
-                          </ListGroup.Item>
-                        ))}
-                      </ListGroup>
-                    )}
-                  </div>
-                )}
+                {/* Global Search (for all users) */}
+                <div className="ms-3 position-relative">
+                  <Form.Control
+                    type="search"
+                    placeholder="Search..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    autoComplete="off"
+                  />
+                  {searchResults.length > 0 && (
+                    <ListGroup
+                      className="position-absolute w-100 zindex-tooltip"
+                      style={{ top: '38px', maxHeight: '300px', overflowY: 'auto' }}
+                    >
+                      {searchResults.map(result => (
+                        <ListGroup.Item
+                          key={result._id || result.title} // static entries may not have _id
+                          action
+                          onClick={() => {
+                            navigate(result.url);
+                            setSearchQuery('');
+                            setSearchResults([]);
+                          }}
+                        >
+                          {result.title} {result.type === 'static' && <em className="text-muted">(info)</em>}
+                        </ListGroup.Item>
+                      ))}
+                    </ListGroup>
+                  )}
+                </div>
+
               </Nav>
             </Offcanvas.Body>
           </Navbar.Offcanvas>
