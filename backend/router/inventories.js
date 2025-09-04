@@ -6,7 +6,6 @@ const User = require('../models/User');
 
 const router = express.Router();
 
-// Get all inventories (with pagination and search)
 router.get('/', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -38,7 +37,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Get user's inventories
 router.get('/my', auth, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -65,7 +63,6 @@ router.get('/my', auth, async (req, res) => {
   }
 });
 
-// Get inventories with write access
 router.get('/shared', auth, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -98,7 +95,6 @@ router.get('/shared', auth, async (req, res) => {
   }
 });
 
-// Get single inventory
 router.get('/:id', async (req, res) => {
   try {
     const inventory = await Inventory.findById(req.params.id)
@@ -115,7 +111,6 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Create new inventory
 router.post('/', auth, [
   body('title').trim().isLength({ min: 1 }).withMessage('Title is required'),
   body('description').optional().trim(),
@@ -150,7 +145,7 @@ router.post('/', auth, [
   }
 });
 
-// Update inventory
+
 router.put('/:id', auth, [
   body('title').trim().isLength({ min: 1 }).withMessage('Title is required'),
   body('description').optional().trim(),
@@ -167,19 +162,17 @@ router.put('/:id', auth, [
       return res.status(404).json({ message: 'Inventory not found' });
     }
 
-    // Check if user has write access
+  
     if (!inventory.hasWriteAccess(req.user._id, req.user.isAdmin)) {
       return res.status(403).json({ message: 'Access denied' });
     }
 
-    // Check version for optimistic locking
     if (req.body.version !== inventory.version) {
       return res.status(409).json({ message: 'Inventory has been modified by another user' });
     }
 
     const { title, description, category, tags, isPublic, customIdFormat, fields, allowedUsers } = req.body;
 
-    // Update inventory
     inventory.title = title;
     inventory.description = description;
     inventory.category = category;
@@ -200,7 +193,6 @@ router.put('/:id', auth, [
   }
 });
 
-// Delete inventory
 router.delete('/:id', auth, async (req, res) => {
   try {
     const inventory = await Inventory.findById(req.params.id);
@@ -208,7 +200,6 @@ router.delete('/:id', auth, async (req, res) => {
       return res.status(404).json({ message: 'Inventory not found' });
     }
 
-    // Check if user is the creator or admin
     if (inventory.createdBy.toString() !== req.user._id.toString() && !req.user.isAdmin) {
       return res.status(403).json({ message: 'Access denied' });
     }
@@ -220,7 +211,6 @@ router.delete('/:id', auth, async (req, res) => {
   }
 });
 
-// Search inventories
 router.get('/search/:query', async (req, res) => {
   try {
     const query = req.params.query;
@@ -245,7 +235,7 @@ router.get('/search/:query', async (req, res) => {
   }
 });
 
-// Add user to allowed users
+
 router.post('/:id/users', auth, async (req, res) => {
   try {
     const inventory = await Inventory.findById(req.params.id);
@@ -253,7 +243,6 @@ router.post('/:id/users', auth, async (req, res) => {
       return res.status(404).json({ message: 'Inventory not found' });
     }
 
-    // Check if user is the creator or admin
     if (inventory.createdBy.toString() !== req.user._id.toString() && !req.user.isAdmin) {
       return res.status(403).json({ message: 'Access denied' });
     }
@@ -264,7 +253,6 @@ router.post('/:id/users', auth, async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Check if user is already in allowedUsers
     if (inventory.allowedUsers.includes(user._id)) {
       return res.status(400).json({ message: 'User already has access' });
     }
@@ -279,7 +267,6 @@ router.post('/:id/users', auth, async (req, res) => {
   }
 });
 
-// Remove user from allowed users
 router.delete('/:id/users/:userId', auth, async (req, res) => {
   try {
     const inventory = await Inventory.findById(req.params.id);
@@ -287,7 +274,6 @@ router.delete('/:id/users/:userId', auth, async (req, res) => {
       return res.status(404).json({ message: 'Inventory not found' });
     }
 
-    // Check if user is the creator or admin
     if (inventory.createdBy.toString() !== req.user._id.toString() && !req.user.isAdmin) {
       return res.status(403).json({ message: 'Access denied' });
     }
@@ -306,7 +292,6 @@ router.delete('/:id/users/:userId', auth, async (req, res) => {
 });
 
 
-// Update custom ID format only
 router.put('/:id/custom-id-format', auth, async (req, res) => {
   try {
     const { customIdFormat } = req.body;
@@ -326,7 +311,6 @@ router.put('/:id/custom-id-format', auth, async (req, res) => {
   }
 });
 
-// routes/inventory.js
 router.post('/:id/generate-preview', async (req, res) => {
   const inventoryId = req.params.id;
   try {

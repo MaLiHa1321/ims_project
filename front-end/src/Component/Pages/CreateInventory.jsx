@@ -1,4 +1,4 @@
-// frontend/src/pages/CreateInventory.js
+
 import React from 'react';
 import InventoryForm from './InventoryForm';
 

@@ -16,7 +16,7 @@ const ItemList = ({ inventoryId }) => {
   useEffect(() => {
     fetchInventory();
     fetchItems();
-    // eslint-disable-next-line
+   
   }, [inventoryId, currentPage]);
 
   const fetchInventory = async () => {
@@ -110,9 +110,8 @@ const ItemList = ({ inventoryId }) => {
   if (loading) return <div className="text-center py-4"><Spinner animation="border" /></div>;
   if (error) return <Alert variant="danger">{error}</Alert>;
 
-  // Only show fields marked showInTableView
   const tableFields = (inventory.fields || []).filter(f => f.showInTableView);
-  const colSpan = 3 + tableFields.length; // Checkbox + CustomId + Created + Actions
+  const colSpan = 3 + tableFields.length; 
 
   return (
     <div className="item-list">
@@ -122,7 +121,7 @@ const ItemList = ({ inventoryId }) => {
             <div className="d-flex align-items-center gap-2 p-2 bg-light rounded">
               <span>{selectedItems.size} item(s) selected</span>
 
-              {/* Show View button only if exactly 1 row is selected */}
+              
               {selectedItems.size === 1 && (
                 <Button
                   as={Link}

@@ -5,7 +5,6 @@ const User = require('../models/User');
 
 const router = express.Router();
 
-// Get all users (admin only)
 router.get('/users', auth, adminAuth, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -42,7 +41,6 @@ router.get('/users', auth, adminAuth, async (req, res) => {
   }
 });
 
-// Create admin user (initial setup)
 router.post('/setup', [
   body('username').isLength({ min: 3 }).withMessage('Username must be at least 3 characters'),
   body('email').isEmail().withMessage('Please enter a valid email'),
@@ -54,7 +52,6 @@ router.post('/setup', [
       return res.status(400).json({ errors: errors.array() });
     }
 
-    // Check if admin already exists
     const existingAdmin = await User.findOne({ isAdmin: true });
     if (existingAdmin) {
       return res.status(400).json({ message: 'Admin user already exists' });
@@ -62,7 +59,6 @@ router.post('/setup', [
 
     const { username, email, password } = req.body;
 
-    // Create admin user
     const user = new User({
       username,
       email,
@@ -89,7 +85,7 @@ router.post('/setup', [
   }
 });
 
-// Update user (admin only)
+
 router.put('/users/:id', auth, adminAuth, [
   body('username').optional().isLength({ min: 3 }).withMessage('Username must be at least 3 characters'),
   body('email').optional().isEmail().withMessage('Please enter a valid email')
@@ -103,7 +99,6 @@ router.put('/users/:id', auth, adminAuth, [
     const { username, email, isAdmin, isBlocked } = req.body;
     const userId = req.params.id;
 
-    // Prevent admin from removing their own admin access
     if (req.user._id.toString() === userId && isAdmin === false) {
       return res.status(400).json({ message: 'You cannot remove your own admin access' });
     }
@@ -136,12 +131,11 @@ router.put('/users/:id', auth, adminAuth, [
   }
 });
 
-// Delete user (admin only)
+
 router.delete('/users/:id', auth, adminAuth, async (req, res) => {
   try {
     const userId = req.params.id;
 
-    // Prevent admin from deleting themselves
     if (req.user._id.toString() === userId) {
       return res.status(400).json({ message: 'You cannot delete your own account' });
     }
@@ -158,7 +152,6 @@ router.delete('/users/:id', auth, adminAuth, async (req, res) => {
   }
 });
 
-// Reset user password (admin only)
 router.post('/users/:id/reset-password', auth, adminAuth, [
   body('newPassword').isLength({ min: 6 }).withMessage('Password must be at least 6 characters')
 ], async (req, res) => {
@@ -185,7 +178,6 @@ router.post('/users/:id/reset-password', auth, adminAuth, [
   }
 });
 
-// Unlock user account (admin only)
 router.post('/users/:id/unlock', auth, adminAuth, async (req, res) => {
   try {
     const userId = req.params.id;
@@ -206,7 +198,6 @@ router.post('/users/:id/unlock', auth, adminAuth, async (req, res) => {
   }
 });
 
-// backend/routes/admin.js - Add this route
 router.get('/check-admin', async (req, res) => {
   try {
     const adminExists = await User.exists({ isAdmin: true });

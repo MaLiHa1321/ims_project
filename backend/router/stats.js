@@ -8,11 +8,11 @@ const {
   calculateNumericStats, 
   calculateStringStats, 
   calculateBooleanStats 
-} = require('../utilis/statsCalculator'); // fixed spelling from 'utilis'
+} = require('../utilis/statsCalculator'); 
 
 const router = express.Router();
 
-// GET statistics for a specific inventory
+
 router.get('/inventory/:inventoryId', auth, async (req, res) => {
   try {
     const { inventoryId } = req.params;
@@ -89,7 +89,7 @@ router.get('/inventory/:inventoryId', auth, async (req, res) => {
   }
 });
 
-// GET summary stats across all inventories user has access to
+
 router.get('/', auth, async (req, res) => {
   try {
     const inventories = await Inventory.find({

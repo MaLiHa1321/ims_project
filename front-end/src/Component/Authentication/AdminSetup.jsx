@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Button, Card, Alert, Container, Row, Col } from 'react-bootstrap';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import axios from 'axios';
 
 const AdminSetup = () => {
@@ -27,21 +27,21 @@ const AdminSetup = () => {
     try {
       const token = localStorage.getItem('token');
       if (token) {
-        // If user is already logged in, check if they're admin
+       
         const config = {
           headers: {
             Authorization: `Bearer ${token}`
           }
         };
         
-        const res = await axios.get('/api/auth/me', config);
+        const res = await axios.get('https://ims-project-server.onrender.com/api/auth/me', config);
         if (res.data.user.isAdmin) {
           setAdminExists(true);
           navigate('/admin');
         }
       } else {
-        // Check if any admin exists
-        const res = await axios.get('/api/admin/check-admin');
+      
+        const res = await axios.get('https://ims-project-server.onrender.com/api/admin/check-admin');
         setAdminExists(res.data.adminExists);
       }
     } catch (error) {
@@ -70,12 +70,11 @@ const AdminSetup = () => {
       };
 
       const body = JSON.stringify({ username, email, password });
-      const res = await axios.post('/api/admin/setup', body, config);
+      const res = await axios.post('https://ims-project-server.onrender.com/api/admin/setup', body, config);
       
       setSuccess(res.data.message);
       setLoading(false);
-      
-      // Redirect to login after 2 seconds
+  
       setTimeout(() => {
         navigate('/login');
       }, 2000);

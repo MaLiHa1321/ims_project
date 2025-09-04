@@ -114,7 +114,7 @@ const Layout = ({ children }) => {
                   </>
                 )}
 
-                {/* Theme Toggle */}
+           
                 <Button
                   variant={theme === 'dark' ? 'secondary' : 'outline-secondary'}
                   size="sm"
@@ -124,7 +124,7 @@ const Layout = ({ children }) => {
                   {theme === 'dark' ? '🌙 Dark' : '☀️ Light'}
                 </Button>
 
-                {/* Global Search (for all users) */}
+              
                 <div className="ms-3 position-relative">
                   <Form.Control
                     type="search"
@@ -140,7 +140,7 @@ const Layout = ({ children }) => {
                     >
                       {searchResults.map(result => (
                         <ListGroup.Item
-                          key={result._id || result.title} // static entries may not have _id
+                          key={result._id || result.title} 
                           action
                           onClick={() => {
                             navigate(result.url);

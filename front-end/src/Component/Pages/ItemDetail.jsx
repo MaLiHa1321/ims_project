@@ -1,4 +1,4 @@
-// frontend/src/components/ItemDetail.js
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Card, Spinner, Alert, Button, Row, Col, Badge } from 'react-bootstrap';
@@ -12,11 +12,10 @@ const ItemDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Fetch item and inventory
   useEffect(() => {
     fetchItem();
     fetchInventory();
-    // eslint-disable-next-line
+   
   }, [inventoryId, itemId]);
 
   const fetchItem = async () => {
@@ -193,7 +192,6 @@ const ItemDetail = () => {
   );
 };
 
-// Optional ErrorBoundary wrapper
 export class ItemDetailErrorBoundary extends React.Component {
   constructor(props) {
     super(props);

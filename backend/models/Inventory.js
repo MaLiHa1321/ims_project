@@ -1,128 +1,8 @@
-// const mongoose = require('mongoose');
 
-// const FieldSchema = new mongoose.Schema({
-//   title: {
-//     type: String,
-//     required: true,
-//     trim: true
-//   },
-//   description: {
-//     type: String,
-//     default: ''
-//   },
-//   type: {
-//     type: String,
-//     enum: ['text', 'textarea', 'number', 'boolean', 'document'],
-//     required: true
-//   },
-//   showInTableView: {
-//     type: Boolean,
-//     default: true
-//   },
-//   order: {
-//     type: Number,
-//     default: 0
-//   }
-// });
-
-// const CustomIdElementSchema = new mongoose.Schema({
-//   type: {
-//     type: String,
-//     enum: ['fixed', 'random20', 'random32', 'random6', 'random9', 'guid', 'datetime', 'sequence'],
-//     required: true
-//   },
-//   value: {
-//     type: String,
-//     default: ''
-//   },
-//   format: {
-//     type: String,
-//     default: ''
-//   },
-//   order: {
-//     type: Number,
-//     default: 0
-//   }
-// });
-
-// const InventorySchema = new mongoose.Schema({
-//   title: {
-//     type: String,
-//     required: true,
-//     trim: true,
-//     maxlength: 100
-//   },
-//   description: {
-//     type: String,
-//     default: ''
-//   },
-//   category: {
-//     type: String,
-//     enum: ['Equipment', 'Furniture', 'Book', 'Document', 'Other'],
-//     default: 'Other'
-//   },
-//   tags: [{
-//     type: String,
-//     trim: true
-//   }],
-//   image: {
-//     type: String,
-//     default: ''
-//   },
-//   isPublic: {
-//     type: Boolean,
-//     default: false
-//   },
-//   customIdFormat: [CustomIdElementSchema],
-//   fields: [FieldSchema],
-//   createdBy: {
-//     type: mongoose.Schema.Types.ObjectId,
-//     ref: 'User',
-//     required: true
-//   },
-//   allowedUsers: [{
-//     type: mongoose.Schema.Types.ObjectId,
-//     ref: 'User'
-//   }],
-//   version: {
-//     type: Number,
-//     default: 0
-//   }
-// }, {
-//   timestamps: true
-// });
-
-// // Index for search functionality
-// InventorySchema.index({
-//   title: 'text',
-//   description: 'text',
-//   tags: 'text'
-// });
-
-// // Static method to search inventories
-// InventorySchema.statics.search = function(query) {
-//   return this.find({
-//     $text: { $search: query }
-//   }, {
-//     score: { $meta: 'textScore' }
-//   }).sort({
-//     score: { $meta: 'textScore' }
-//   }).populate('createdBy', 'username');
-// };
-
-// // Method to check if user has write access
-// InventorySchema.methods.hasWriteAccess = function(userId, isAdmin) {
-//   if (isAdmin) return true;
-//   if (this.createdBy.toString() === userId.toString()) return true;
-//   if (this.isPublic) return true;
-//   return this.allowedUsers.some(id => id.toString() === userId.toString());
-// };
-
-// module.exports = mongoose.model('Inventory', InventorySchema);
 
 const mongoose = require('mongoose');
 const crypto = require('crypto');
-const Item = require('./Item'); // Needed for sequence
+const Item = require('./Item'); 
 
 const FieldSchema = new mongoose.Schema({
   title: { type: String, required: true, trim: true },
@@ -157,10 +37,8 @@ const InventorySchema = new mongoose.Schema({
   version: { type: Number, default: 0 }
 }, { timestamps: true });
 
-// Index for search
 InventorySchema.index({ title: 'text', description: 'text', tags: 'text' });
 
-// Static method: search
 InventorySchema.statics.search = function(query) {
   return this.find(
     { $text: { $search: query } },
@@ -170,7 +48,6 @@ InventorySchema.statics.search = function(query) {
   .populate('createdBy', 'username');
 };
 
-// Method: check write access
 InventorySchema.methods.hasWriteAccess = function(userId, isAdmin) {
   if (isAdmin) return true;
   if (this.createdBy.toString() === userId.toString()) return true;
@@ -178,7 +55,6 @@ InventorySchema.methods.hasWriteAccess = function(userId, isAdmin) {
   return (this.allowedUsers || []).some(id => id.toString() === userId.toString());
 };
 
-// Method: generate custom ID
 InventorySchema.methods.generateCustomId = async function() {
   const elements = this.customIdFormat.sort((a, b) => a.order - b.order);
   let generatedId = '';

@@ -1,4 +1,4 @@
-// backend/models/User.js
+
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
@@ -43,7 +43,7 @@ const UserSchema = new mongoose.Schema({
   lockUntil: {
     type: Date
   },
-  // For social auth
+
   googleId: String,
   facebookId: String,
   profile: {
@@ -55,19 +55,17 @@ const UserSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Virtual for checking if account is locked
 UserSchema.virtual('isLocked').get(function() {
   return !!(this.lockUntil && this.lockUntil > Date.now());
 });
 
-// Hash password before saving
 UserSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
   
   try {
-    // Generate salt
+ 
     const salt = await bcrypt.genSalt(12);
-    // Hash password
+   
     this.password = await bcrypt.hash(this.password, salt);
     next();
   } catch (error) {
@@ -75,7 +73,6 @@ UserSchema.pre('save', async function(next) {
   }
 });
 
-// Compare password method
 UserSchema.methods.comparePassword = async function(candidatePassword) {
   try {
     return await bcrypt.compare(candidatePassword, this.password);
@@ -93,19 +90,17 @@ UserSchema.methods.incrementLoginAttempts = function() {
       $unset: { lockUntil: 1 }
     });
   }
-  
-  // Otherwise, increment
+ 
   const updates = { $inc: { loginAttempts: 1 } };
   
-  // Lock the account if we've reached max attempts and it's not locked already
   if (this.loginAttempts + 1 >= 5 && !this.isLocked) {
-    updates.$set = { lockUntil: Date.now() + 60 * 60 * 1000 }; // 1 hour
+    updates.$set = { lockUntil: Date.now() + 60 * 60 * 1000 }; 
   }
   
   return this.updateOne(updates);
 };
 
-// Reset login attempts after successful login
+
 UserSchema.methods.resetLoginAttempts = function() {
   return this.updateOne({
     $set: { loginAttempts: 0 },

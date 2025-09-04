@@ -1,4 +1,4 @@
-// backend/middleware/auth.js
+
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
@@ -17,12 +17,10 @@ const auth = async (req, res, next) => {
       return res.status(401).json({ message: 'Token is not valid' });
     }
     
-    // Check if user is blocked
     if (user.isBlocked) {
       return res.status(401).json({ message: 'Account is blocked. Please contact administrator.' });
     }
     
-    // Check if account is locked due to too many login attempts
     if (user.isLocked) {
       const remainingTime = Math.ceil((user.lockUntil - Date.now()) / 1000 / 60);
       return res.status(401).json({ 

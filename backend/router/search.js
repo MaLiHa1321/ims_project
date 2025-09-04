@@ -2,23 +2,17 @@ const express = require('express');
 const router = express.Router();
 const Inventory = require('../models/Inventory');
 const Item = require('../models/Item');
-const User = require('../models/User'); // optional, if you want to search users
+const User = require('../models/User');
 
-// GET /api/search?q=keyword
 router.get('/', async (req, res) => {
   try {
     const query = req.query.q;
     if (!query) return res.json([]);
 
-    const regex = new RegExp(query, 'i'); // case-insensitive
-
-    // Search Inventories
+    const regex = new RegExp(query, 'i');
     const inventories = await Inventory.find({ title: regex }).limit(5);
-
-    // Search Items
     const items = await Item.find({ $or: [{ title: regex }, { customId: regex }] }).limit(5);
 
-    // Optional: search Users
     const users = await User.find({ username: regex }).limit(5);
 
     const results = [

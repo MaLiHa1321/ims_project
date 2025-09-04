@@ -29,7 +29,7 @@ const Dashboard = () => {
 
       const config = { headers: { Authorization: `Bearer ${token}` } };
 
-      // Fetch inventory counts
+
       const [myRes, sharedRes] = await Promise.all([
         axios.get('https://ims-project-server.onrender.com/api/inventories/my?limit=1', config),
         axios.get('https://ims-project-server.onrender.com/api/inventories/shared?limit=1', config),
@@ -38,7 +38,7 @@ const Dashboard = () => {
       setStats({
         myInventories: myRes.data.totalInventories,
         sharedInventories: sharedRes.data.totalInventories,
-        totalItems: 0, // 👈 since InventoryStats is removed, we don’t need detailed stats
+        totalItems: 0, 
       });
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
@@ -73,7 +73,7 @@ const Dashboard = () => {
       {error && <Alert variant="danger" className="mb-4">{error}</Alert>}
       {statsError && <Alert variant="warning" className="mb-4">{statsError}</Alert>}
 
-      {/* Stats Cards */}
+   
       <Row className="mb-5">
         <Col md={6} className="mb-3">
           <Card className="text-center h-100">
@@ -104,7 +104,6 @@ const Dashboard = () => {
         </Col>
       </Row>
 
-      {/* Inventory Lists */}
       <Row>
         <Col lg={6} className="mb-5">
           <InventoryList type="my" title="My Inventories" />

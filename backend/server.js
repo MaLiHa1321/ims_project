@@ -5,9 +5,8 @@ require('dotenv').config();
 
 const app = express();
 
-// Middleware
 app.use(cors({
-  origin: "*", // allow all for testing
+  origin: "*", 
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
@@ -18,27 +17,15 @@ app.get("/", (req, res) => {
   res.send("APP is running ");
 });
 
-
-// Routes
-// Add this after the other middleware
 app.use('/api/auth', require('./router/auth'));
-// Add this after the auth routes
 app.use('/api/inventories', require('./router/inventories'));
-// Add other routes later
 app.use('/api/admin', require('./router/admin'));
 app.use('/api/items', require('./router/items'));
-// backend/server.js - Add this line
 app.use('/api/stats', require('./router/stats'));
-
 app.use('/api/search', require('./router/search'));
-// MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.log(err));
-
-// mongoose.connect(process.env.MONGODB_URI)
-//   .then(() => console.log('MongoDB connected'))
-//   .catch(err => console.error(err));
 
 
 const PORT = process.env.PORT || 5000;

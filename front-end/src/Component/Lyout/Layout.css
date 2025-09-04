@@ -2,7 +2,6 @@
   min-height: calc(100vh - 160px);
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
   .navbar-brand {
     font-size: 1.1rem;
@@ -14,7 +13,6 @@
   }
 }
 
-/* Improve mobile touch targets */
 .nav-link {
   padding: 0.5rem 1rem;
 }
@@ -30,7 +28,6 @@
   font-size: 1.5rem;
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
   .navbar-brand {
     font-size: 1.2rem;
@@ -42,18 +39,15 @@
   }
 }
 
-/* Improve mobile touch targets */
 .nav-link {
   padding: 0.5rem 1rem;
 }
 
-/* Style for the admin badge */
 .badge {
   font-size: 0.6rem;
   vertical-align: middle;
 }
 
-/* User info styling */
 .text-muted {
   font-size: 0.9rem;
   cursor: default;
