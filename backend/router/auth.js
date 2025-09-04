@@ -40,6 +40,8 @@ router.post('/register', async (req, res) => {
   }
 });
 
+
+
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -49,36 +51,34 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
+
     if (user.isBlocked) {
-      return res.status(400).json({ message: 'Account is blocked. Please contact administrator.' });
+      return res.status(403).json({ message: 'Account is blocked. Please contact administrator.' });
     }
 
+ 
     if (user.isLocked) {
       const remainingTime = Math.ceil((user.lockUntil - Date.now()) / 1000 / 60);
-      return res.status(400).json({ 
+      return res.status(423).json({ 
         message: `Account is temporarily locked. Try again in ${remainingTime} minutes.` 
       });
     }
 
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
-     
       await user.incrementLoginAttempts();
-      
-      const attemptsLeft = 5 - (user.loginAttempts + 1);
+      const updatedUser = await User.findById(user._id);
+      const attemptsLeft = Math.max(0, 5 - updatedUser.loginAttempts);
+
       return res.status(400).json({ 
         message: `Invalid credentials. ${attemptsLeft > 0 ? attemptsLeft + ' attempts left.' : 'Account will be locked after next failed attempt.'}` 
       });
     }
 
-
     await user.resetLoginAttempts();
-    
- 
     user.lastLogin = Date.now();
     await user.save();
 
-   
     const token = jwt.sign(
       { userId: user._id },
       process.env.JWT_SECRET,
@@ -91,7 +91,8 @@ router.post('/login', async (req, res) => {
         id: user._id,
         username: user.username,
         email: user.email,
-        isAdmin: user.isAdmin
+        isAdmin: user.isAdmin,
+        isBlocked: user.isBlocked
       }
     });
   } catch (error) {

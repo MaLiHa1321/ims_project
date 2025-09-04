@@ -1,4 +1,3 @@
-
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
@@ -42,14 +41,6 @@ const UserSchema = new mongoose.Schema({
   },
   lockUntil: {
     type: Date
-  },
-
-  googleId: String,
-  facebookId: String,
-  profile: {
-    firstName: String,
-    lastName: String,
-    avatar: String
   }
 }, {
   timestamps: true
@@ -63,9 +54,7 @@ UserSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
   
   try {
- 
     const salt = await bcrypt.genSalt(12);
-   
     this.password = await bcrypt.hash(this.password, salt);
     next();
   } catch (error) {
@@ -81,9 +70,8 @@ UserSchema.methods.comparePassword = async function(candidatePassword) {
   }
 };
 
-// Increment login attempts
 UserSchema.methods.incrementLoginAttempts = function() {
-  // If we have a previous lock that has expired, restart at 1
+ 
   if (this.lockUntil && this.lockUntil < Date.now()) {
     return this.updateOne({
       $set: { loginAttempts: 1 },
@@ -99,7 +87,6 @@ UserSchema.methods.incrementLoginAttempts = function() {
   
   return this.updateOne(updates);
 };
-
 
 UserSchema.methods.resetLoginAttempts = function() {
   return this.updateOne({

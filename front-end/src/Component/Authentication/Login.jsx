@@ -54,7 +54,7 @@ localStorage.setItem('user', JSON.stringify(res.data.user));
                   <Form.Label>Email</Form.Label>
                   <Form.Control
                     type="email"
-                    placeholder="Enter email"
+                    placeholder="aaa12@gmail.com"
                     name="email"
                     value={email}
                     onChange={onChange}
@@ -66,7 +66,7 @@ localStorage.setItem('user', JSON.stringify(res.data.user));
                   <Form.Label>Password</Form.Label>
                   <Form.Control
                     type="password"
-                    placeholder="Password"
+                    placeholder="aa12345@"
                     name="password"
                     value={password}
                     onChange={onChange}
@@ -87,6 +87,9 @@ localStorage.setItem('user', JSON.stringify(res.data.user));
               <div className="text-center mt-3">
                 <p>
                   Don't have an account? <Link to="/register">Register here</Link>
+                </p>
+                <p>
+                  Login as an Admin <Link to="/admin/setup">Login Here</Link>
                 </p>
               </div>
             </Card.Body>

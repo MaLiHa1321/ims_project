@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Table, Button, Modal, Form, Alert, Spinner, Pagination } from 'react-bootstrap';
+import { Container, Row, Col, Card, Table, Button, Alert, Spinner, Pagination } from 'react-bootstrap';
 import axios from 'axios';
 
 const AdminDashboard = () => {
@@ -7,17 +8,12 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [showModal, setShowModal] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    isAdmin: false,
-    isBlocked: false
-  });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
+  const [selectedUsers, setSelectedUsers] = useState([]);
+
+  const currentUserId = JSON.parse(localStorage.getItem('user'))?.id;
 
   useEffect(() => {
     fetchUsers();
@@ -27,160 +23,92 @@ const AdminDashboard = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      };
+      const config = { headers: { Authorization: `Bearer ${token}` } };
 
-      const res = await axios.get(`https://ims-project-server.onrender.com/api/admin/users?page=${currentPage}&limit=10`, config);
+      const res = await axios.get(
+        `https://ims-project-server.onrender.com/api/admin/users?page=${currentPage}&limit=10`,
+        config
+      );
       setUsers(res.data.users);
       setTotalPages(res.data.totalPages);
+      setSelectedUsers([]);
     } catch (error) {
-      console.error('Error fetching users:', error);
+      console.log(error)
       setError('Failed to load users');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleEdit = (user) => {
-    setSelectedUser(user);
-    setFormData({
-      username: user.username,
-      email: user.email,
-      isAdmin: user.isAdmin,
-      isBlocked: user.isBlocked
-    });
-    setShowModal(true);
+  const toggleUserSelection = (userId) => {
+    setSelectedUsers((prev) =>
+      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
+    );
   };
 
-  const handleCloseModal = () => {
-    setShowModal(false);
-    setSelectedUser(null);
-    setFormData({
-      username: '',
-      email: '',
-      isAdmin: false,
-      isBlocked: false
-    });
-    setError('');
+  const toggleSelectAll = () => {
+    if (selectedUsers.length === users.length) setSelectedUsers([]);
+    else setSelectedUsers(users.map((u) => u._id));
   };
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setActionLoading(true);
-    setError('');
-
-    try {
-      const token = localStorage.getItem('token');
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      };
-
-      await axios.put(`https://ims-project-server.onrender.com//api/admin/users/${selectedUser._id}`, formData, config);
-      setSuccess('User updated successfully');
-      fetchUsers();
-      handleCloseModal();
-    } catch (error) {
-      setError(error.response?.data?.message || 'Failed to update user');
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const handleDelete = async (userId) => {
-    if (!window.confirm('Are you sure you want to delete this user?')) return;
+  const handleBulkDelete = async () => {
+    if (selectedUsers.length === 0) return alert('No users selected');
+    if (!window.confirm(`Delete ${selectedUsers.length} users?`)) return;
 
     setActionLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      };
+      const config = { headers: { Authorization: `Bearer ${token}` } };
 
-      await axios.delete(`https://ims-project-server.onrender.com/api/admin/users/${userId}`, config);
-      setSuccess('User deleted successfully');
+      await Promise.all(
+        selectedUsers
+          .filter(id => id !== currentUserId) 
+          .map((id) =>
+            axios.delete(`https://ims-project-server.onrender.com/api/admin/users/${id}`, config)
+          )
+      );
+
+      setSuccess('Selected users deleted successfully (excluding yourself)');
       fetchUsers();
     } catch (error) {
-      setError(error.response?.data?.message || 'Failed to delete user');
+      console.log(error);
+      setError('Failed to delete users');
     } finally {
       setActionLoading(false);
     }
   };
 
-  const handleResetPassword = async (userId) => {
-    const newPassword = prompt('Enter new password for this user:');
-    if (!newPassword || newPassword.length < 6) {
-      alert('Password must be at least 6 characters long');
-      return;
-    }
-
-    if (!window.confirm('Are you sure you want to reset this user\'s password?')) return;
+  const handleBulkBlock = async (block = true) => {
+    if (selectedUsers.length === 0) return alert('No users selected');
 
     setActionLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      };
+      const config = { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } };
 
-      await axios.post(`https://ims-project-server.onrender.com/api/admin/users/${userId}/reset-password`, { newPassword }, config);
-      setSuccess('Password reset successfully');
-    } catch (error) {
-      setError(error.response?.data?.message || 'Failed to reset password');
-    } finally {
-      setActionLoading(false);
-    }
-  };
+      await Promise.all(
+        selectedUsers
+          .filter(id => id !== currentUserId) 
+          .map((id) =>
+            axios.put(`https://ims-project-server.onrender.com/api/admin/users/${id}`, { isBlocked: block }, config)
+          )
+      );
 
-  const handleUnlock = async (userId) => {
-    setActionLoading(true);
-    try {
-      const token = localStorage.getItem('token');
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      };
-
-      await axios.post(`https://ims-project-server.onrender.com/api/admin/users/${userId}/unlock`, {}, config);
-      setSuccess('User account unlocked successfully');
+      setSuccess(`Selected users ${block ? 'blocked' : 'unblocked'} successfully (excluding yourself)`);
       fetchUsers();
     } catch (error) {
-      setError(error.response?.data?.message || 'Failed to unlock account');
+      console.log(error)
+      setError('Failed to update users');
     } finally {
       setActionLoading(false);
     }
-  };
-
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
   };
 
   if (loading) {
     return (
       <Container>
         <div className="text-center py-5">
-          <Spinner animation="border" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </Spinner>
+          <Spinner animation="border" />
         </div>
       </Container>
     );
@@ -189,9 +117,20 @@ const AdminDashboard = () => {
   return (
     <Container>
       <h1 className="mb-4">Admin Dashboard</h1>
-
       {error && <Alert variant="danger">{error}</Alert>}
       {success && <Alert variant="success">{success}</Alert>}
+
+      <div className="mb-3 d-flex gap-2">
+        <Button variant="danger" disabled={actionLoading} onClick={handleBulkDelete}>
+          Delete Selected
+        </Button>
+        <Button variant="warning" disabled={actionLoading} onClick={() => handleBulkBlock(true)}>
+          Block Selected
+        </Button>
+        <Button variant="success" disabled={actionLoading} onClick={() => handleBulkBlock(false)}>
+          Unblock Selected
+        </Button>
+      </div>
 
       <Row>
         <Col>
@@ -204,26 +143,33 @@ const AdminDashboard = () => {
                 <Table striped bordered hover>
                   <thead>
                     <tr>
+                      <th>
+                        <input
+                          type="checkbox"
+                          checked={selectedUsers.length === users.length}
+                          onChange={toggleSelectAll}
+                        />
+                      </th>
                       <th>Username</th>
                       <th>Email</th>
                       <th>Admin</th>
                       <th>Status</th>
                       <th>Last Login</th>
-                      <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {users.map(user => (
+                    {users.map((user) => (
                       <tr key={user._id}>
+                        <td>
+                          <input
+                            type="checkbox"
+                            checked={selectedUsers.includes(user._id)}
+                            onChange={() => toggleUserSelection(user._id)}
+                          />
+                        </td>
                         <td>{user.username}</td>
                         <td>{user.email}</td>
-                        <td>
-                          {user.isAdmin ? (
-                            <span className="badge bg-success">Yes</span>
-                          ) : (
-                            <span className="badge bg-secondary">No</span>
-                          )}
-                        </td>
+                        <td>{user.isAdmin ? 'Yes' : 'No'}</td>
                         <td>
                           {user.isBlocked ? (
                             <span className="badge bg-danger">Blocked</span>
@@ -233,47 +179,7 @@ const AdminDashboard = () => {
                             <span className="badge bg-success">Active</span>
                           )}
                         </td>
-                        <td>
-                          {user.lastLogin ? new Date(user.lastLogin).toLocaleString() : 'Never'}
-                        </td>
-                        <td>
-                          <div className="btn-group" role="group">
-                            <Button
-                              variant="outline-primary"
-                              size="sm"
-                              onClick={() => handleEdit(user)}
-                              disabled={actionLoading}
-                            >
-                              Edit
-                            </Button>
-                            <Button
-                              variant="outline-info"
-                              size="sm"
-                              onClick={() => handleResetPassword(user._id)}
-                              disabled={actionLoading}
-                            >
-                              Reset Password
-                            </Button>
-                            {user.isLocked && (
-                              <Button
-                                variant="outline-warning"
-                                size="sm"
-                                onClick={() => handleUnlock(user._id)}
-                                disabled={actionLoading}
-                              >
-                                Unlock
-                              </Button>
-                            )}
-                            <Button
-                              variant="outline-danger"
-                              size="sm"
-                              onClick={() => handleDelete(user._id)}
-                              disabled={actionLoading || user._id === JSON.parse(localStorage.getItem('user')).id}
-                            >
-                              Delete
-                            </Button>
-                          </div>
-                        </td>
+                        <td>{user.lastLogin ? new Date(user.lastLogin).toLocaleString() : 'Never'}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -285,20 +191,20 @@ const AdminDashboard = () => {
                   <Pagination>
                     <Pagination.Prev
                       disabled={currentPage === 1}
-                      onClick={() => handlePageChange(currentPage - 1)}
+                      onClick={() => setCurrentPage(currentPage - 1)}
                     />
                     {[...Array(totalPages)].map((_, index) => (
                       <Pagination.Item
                         key={index + 1}
                         active={index + 1 === currentPage}
-                        onClick={() => handlePageChange(index + 1)}
+                        onClick={() => setCurrentPage(index + 1)}
                       >
                         {index + 1}
                       </Pagination.Item>
                     ))}
                     <Pagination.Next
                       disabled={currentPage === totalPages}
-                      onClick={() => handlePageChange(currentPage + 1)}
+                      onClick={() => setCurrentPage(currentPage + 1)}
                     />
                   </Pagination>
                 </div>
@@ -307,60 +213,6 @@ const AdminDashboard = () => {
           </Card>
         </Col>
       </Row>
-
-      {/* Edit User Modal */}
-      <Modal show={showModal} onHide={handleCloseModal}>
-        <Modal.Header closeButton>
-          <Modal.Title>Edit User</Modal.Title>
-        </Modal.Header>
-        <Form onSubmit={handleSubmit}>
-          <Modal.Body>
-            <Form.Group className="mb-3">
-              <Form.Label>Username</Form.Label>
-              <Form.Control
-                type="text"
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
-                required
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Email</Form.Label>
-              <Form.Control
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
-            </Form.Group>
-            <Form.Check
-              type="checkbox"
-              name="isAdmin"
-              label="Administrator"
-              checked={formData.isAdmin}
-              onChange={handleChange}
-              className="mb-3"
-            />
-            <Form.Check
-              type="checkbox"
-              name="isBlocked"
-              label="Block User"
-              checked={formData.isBlocked}
-              onChange={handleChange}
-            />
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={handleCloseModal}>
-              Cancel
-            </Button>
-            <Button variant="primary" type="submit" disabled={actionLoading}>
-              {actionLoading ? 'Saving...' : 'Save Changes'}
-            </Button>
-          </Modal.Footer>
-        </Form>
-      </Modal>
     </Container>
   );
 };

@@ -1,6 +1,4 @@
-// backend/utils/statsCalculator.js
 
-// Numeric statistics
 const calculateNumericStats = (values) => {
   if (!values || values.length === 0) {
     return { count: 0, average: 0, min: 0, max: 0, sum: 0 };
@@ -29,7 +27,6 @@ const calculateNumericStats = (values) => {
   };
 };
 
-// String statistics
 const calculateStringStats = (values) => {
   if (!values || values.length === 0) {
     return { count: 0, topValues: [], uniqueCount: 0 };
@@ -58,7 +55,7 @@ const calculateStringStats = (values) => {
   };
 };
 
-// Boolean statistics
+
 const calculateBooleanStats = (values) => {
   if (!values || values.length === 0) {
     return {

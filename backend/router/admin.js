@@ -52,13 +52,15 @@ router.post('/setup', [
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const existingAdmin = await User.findOne({ isAdmin: true });
-    if (existingAdmin) {
-      return res.status(400).json({ message: 'Admin user already exists' });
-    }
-
     const { username, email, password } = req.body;
 
+    // ✅ Check if this email already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: 'User with this email already exists' });
+    }
+
+    // ✅ Create new admin
     const user = new User({
       username,
       email,
@@ -84,6 +86,8 @@ router.post('/setup', [
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
+
+
 
 
 router.put('/users/:id', auth, adminAuth, [
